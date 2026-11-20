@@ -992,13 +992,11 @@ app.use((req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
+const HOST = '0.0.0.0';
 
 export default app;
 
-if (process.env.NODE_ENV !== 'production') {
-  const server = app.listen(PORT, () => {
-    console.log(`Food Bite Services API running on port ${PORT}`);
-  });
-  // Graceful shutdown for serverless
-  process.on('SIGTERM', () => server.close(() => process.exit(0)));
-}
+const server = app.listen(PORT, HOST, () => {
+  console.log(`Food Bite Services API running on ${HOST}:${PORT}`);
+});
+process.on('SIGTERM', () => server.close(() => process.exit(0)));
