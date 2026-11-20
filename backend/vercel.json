@@ -1,0 +1,19 @@
+{
+  "functions": {
+    "api/index.js": {
+      "memory": 1024,
+      "timeout": 30
+    }
+  },
+  "routes": {
+    "/api/*": "api/index.js",
+    "/health": "api/index.js"
+  },
+  "headers": {
+    "*": [
+      "X-Content-Type-Options: nosniff",
+      "X-Frame-Options: DENY",
+      "Referrer-Policy: strict-origin-when-cross-origin"
+    ]
+  }
+}

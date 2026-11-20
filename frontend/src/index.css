@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom properties for design tokens */
+:root {
+  --font-headline: 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --font-label: 'Plus Jakarta Sans', sans-serif;
+  --color-rust: #B23A0F;
+  --color-rust-light: #E57373;
+  --color-warm-off-white: #FAF9F6;
+  --color-white: #FFFFFF;
+  --color-dark-gray: #333333;
+  --color-medium-gray: #666666;
+  --radius-card: 14px;
+  --radius-pill: 50px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-warm-off-white: #2d2d2d;
+    --color-white: #1a1a1a;
+  }
+}
