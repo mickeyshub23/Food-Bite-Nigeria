@@ -30,6 +30,3 @@
 --     bucket_id = 'product-images'
 --     AND (SELECT role FROM profiles WHERE id = auth.uid()) = 'admin'
 --   );
-
--- +go migrate Down
--- No-op: storage bucket management is done via Supabase dashboard

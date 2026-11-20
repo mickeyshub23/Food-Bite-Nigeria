@@ -7,6 +7,3 @@ CREATE TABLE settings (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
-
--- +go migrate Down
-DROP TABLE IF EXISTS settings CASCADE;

@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabase';
 import { apiFetch } from '../utils/api';
-import { UseAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import Button from './components/Button';
 import StatusBadge from './components/StatusBadge';
 import EmptyState from './components/EmptyState';
 import Skeleton from './components/Skeleton';
 
 const OrdersManagement = () => {
-  const { user } = UseAuth();
+  const { user } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ show: false, text: '', type: '' });

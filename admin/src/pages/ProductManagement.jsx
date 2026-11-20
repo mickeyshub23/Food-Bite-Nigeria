@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabase';
 import { apiFetch } from '../utils/api';
-import { UseAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import Button from './components/Button';
 import StatusBadge from './components/StatusBadge';
 import CategoryChip from './components/CategoryChip';
@@ -9,7 +9,7 @@ import EmptyState from './components/EmptyState';
 import Skeleton from './components/Skeleton';
 
 const ProductManagement = () => {
-  const { user } = UseAuth();
+  const { user } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);

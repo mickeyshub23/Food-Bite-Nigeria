@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabase';
 import { apiFetch } from '../utils/api';
-import { UseAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import StatusBadge from './components/StatusBadge';
 import Skeleton from './components/Skeleton';
 import EmptyState from './components/EmptyState';
 
 const AdminDashboard = () => {
-  const { user } = UseAuth();
+  const { user } = useAuth();
   const [stats, setStats] = useState(null);
   const [recentOrders, setRecentOrders] = useState([]);
   const [lowStock, setLowStock] = useState([]);

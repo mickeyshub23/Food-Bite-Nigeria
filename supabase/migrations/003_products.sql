@@ -26,6 +26,3 @@ CREATE INDEX idx_products_category_id ON products(category_id);
 CREATE INDEX idx_products_is_featured ON products(is_featured);
 CREATE INDEX idx_products_is_active ON products(is_active);
 CREATE INDEX idx_products_availability ON products(availability);
-
--- +go migrate Down
-DROP TABLE IF EXISTS products CASCADE;

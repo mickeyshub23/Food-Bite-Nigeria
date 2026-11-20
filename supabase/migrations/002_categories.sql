@@ -11,6 +11,3 @@ CREATE TABLE categories (
 );
 
 CREATE INDEX idx_categories_slug ON categories(slug);
-
--- +go migrate Down
-DROP TABLE IF EXISTS categories CASCADE;

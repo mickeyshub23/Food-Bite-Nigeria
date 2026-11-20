@@ -13,16 +13,17 @@ INSERT INTO categories (name, slug, description, display_order) VALUES
 
 -- Products (9 dishes from designs: 1 sold-out, 1 low-stock)
 -- Prices in kobo (1 ₦ = 100 kobo), price formatting: ₦1,200 etc.
+-- category_id uses subqueries to look up the UUID by slug
 INSERT INTO products (slug, name, description, price_kobo, stock, low_stock_threshold, availability, category_id, portion_size, dietary_tags, region, is_featured, is_active, rating, rating_count) VALUES
-  ('jollof-rice', 'Jollof Rice', 'Party jollof with tomatoes and peppers', 180000, 12, 5, 'in_stock', 'rice-grains', 'large', '{vegetarian}', 'lagos', true, true, 4.7, 842),
-  ('eba-and-egusi', 'Eba & Egusi Soup', 'Pounded yam alternative with melon seeds', 150000, 8, 5, 'low_stock', 'soups-stews', 'medium', '{gluten-free}', 'ogun', false, true, 4.5, 631),
-  ('ofe-akwu', 'Ofe Akwu (Palm Fruit Stew)', 'Rich palm fruit stew with smoked fish', 220000, 3, 5, 'sold_out', 'soups-stews', 'large', '{contains-fish}', 'delta', false, true, 4.8, 214),
-  ('pounded-yam', 'Pounded Yam', 'Smooth pounded yam with vegetable soup', 200000, 15, 5, 'in_stock', 'soups-stews', 'large', '', 'osun', false, true, 4.6, 712),
-  ('akara', 'Akara (Bean Cakes)', 'Fried bean cakes, breakfast favourite', 30000, 20, 5, 'in_stock', 'vegetables-fruits', 'small', '{vegan, gluten-free}', 'lagos', true, true, 4.3, 319),
-  ('suya', 'Suya (Spiced Beef)', 'Grilled spiced beef skewers', 25000, 10, 5, 'in_stock', 'meats-fish', 'medium', '{contains-nuts}', 'kano', false, true, 4.4, 487),
-  ('fufu', 'Fufu & Egusi', 'Classic fufu with melon seed soup', 230000, 6, 5, 'low_stock', 'soups-stews', 'large', '', 'cross_river', false, true, 4.6, 198),
-  ('izak', 'Izak (Smoked Fish)', 'Freshly smoked catfish', 8000, 25, 5, 'in_stock', 'meats-fish', 'small', '', 'river_state', false, true, 4.2, 156),
-  ('kulikuli', 'Kulikuli (Groundnut Cake)', 'Crunchy groundnut snack', 5000, 30, 5, 'in_stock', 'spices-seasonings', 'small', '{vegan}', 'lagos', false, true, 4.1, 283);
+  ('jollof-rice', 'Jollof Rice', 'Party jollof with tomatoes and peppers', 180000, 12, 5, 'in_stock', (SELECT id FROM categories WHERE slug = 'rice-grains'), 'large', '{vegetarian}', 'lagos', true, true, 4.7, 842),
+  ('eba-and-egusi', 'Eba & Egusi Soup', 'Pounded yam alternative with melon seeds', 150000, 8, 5, 'low_stock', (SELECT id FROM categories WHERE slug = 'soups-stews'), 'medium', '{gluten-free}', 'ogun', false, true, 4.5, 631),
+  ('ofe-akwu', 'Ofe Akwu (Palm Fruit Stew)', 'Rich palm fruit stew with smoked fish', 220000, 3, 5, 'sold_out', (SELECT id FROM categories WHERE slug = 'soups-stews'), 'large', '{contains-fish}', 'delta', false, true, 4.8, 214),
+  ('pounded-yam', 'Pounded Yam', 'Smooth pounded yam with vegetable soup', 200000, 15, 5, 'in_stock', (SELECT id FROM categories WHERE slug = 'soups-stews'), 'large', '', 'osun', false, true, 4.6, 712),
+  ('akara', 'Akara (Bean Cakes)', 'Fried bean cakes, breakfast favourite', 30000, 20, 5, 'in_stock', (SELECT id FROM categories WHERE slug = 'vegetables-fruits'), 'small', '{vegan, gluten-free}', 'lagos', true, true, 4.3, 319),
+  ('suya', 'Suya (Spiced Beef)', 'Grilled spiced beef skewers', 25000, 10, 5, 'in_stock', (SELECT id FROM categories WHERE slug = 'meats-fish'), 'medium', '{contains-nuts}', 'kano', false, true, 4.4, 487),
+  ('fufu', 'Fufu & Egusi', 'Classic fufu with melon seed soup', 230000, 6, 5, 'low_stock', (SELECT id FROM categories WHERE slug = 'soups-stews'), 'large', '', 'cross_river', false, true, 4.6, 198),
+  ('izak', 'Izak (Smoked Fish)', 'Freshly smoked catfish', 8000, 25, 5, 'in_stock', (SELECT id FROM categories WHERE slug = 'meats-fish'), 'small', '', 'river_state', false, true, 4.2, 156),
+  ('kulikuli', 'Kulikuli (Groundnut Cake)', 'Crunchy groundnut snack', 5000, 30, 5, 'in_stock', (SELECT id FROM categories WHERE slug = 'spices-seasonings'), 'small', '{vegan}', 'lagos', false, true, 4.1, 283);
 
 -- Delivery zones
 INSERT INTO delivery_zones (name, fee_kobo, min_order_kobo, estimated_days, is_active) VALUES

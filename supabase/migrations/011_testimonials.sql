@@ -13,6 +13,3 @@ CREATE TABLE testimonials (
 );
 
 CREATE INDEX idx_testimonials_is_active ON testimonials(is_active);
-
--- +go migrate Down
-DROP TABLE IF EXISTS testimonials CASCADE;

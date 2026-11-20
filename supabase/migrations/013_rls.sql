@@ -135,7 +135,3 @@ CREATE POLICY "Contact messages are insertable by anyone" ON contact_messages
 
 CREATE POLICY "Contact messages are updatable by admin" ON contact_messages
   FOR UPDATE USING (is_admin());
-
--- +go migrate Down
--- RLS is not easily reversible; drop policies instead
--- (This is intentionally empty - RLS cannot be cleanly undone)

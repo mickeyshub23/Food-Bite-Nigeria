@@ -15,6 +15,3 @@ CREATE TABLE promo_codes (
 
 CREATE INDEX idx_promo_codes_code ON promo_codes(code);
 CREATE INDEX idx_promo_codes_active ON promo_codes(active);
-
--- +go migrate Down
-DROP TABLE IF EXISTS promo_codes CASCADE;

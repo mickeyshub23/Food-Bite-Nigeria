@@ -9,6 +9,3 @@ CREATE TABLE delivery_zones (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
-
--- +go migrate Down
-DROP TABLE IF EXISTS delivery_zones CASCADE;

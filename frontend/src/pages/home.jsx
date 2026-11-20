@@ -140,7 +140,7 @@ const HomePage = () => {
       <section className="py-12 bg-white max-w-7xl mx-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Breadcrumb items={[{ label: 'Home' }, { label: 'Best Sellers' }]} />
-          <h2 className="font-headline font-bold text-2xl text-dark_gray mb-6 mb-lg-8">Best Sellers</div>
+          <h2 className="font-headline font-bold text-2xl text-dark_gray mb-6 mb-lg-8">Best Sellers</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} onAddToCart={handleAddToCart} />

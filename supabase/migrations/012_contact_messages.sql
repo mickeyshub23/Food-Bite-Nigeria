@@ -14,6 +14,3 @@ CREATE TABLE contact_messages (
 
 CREATE INDEX idx_contact_messages_status ON contact_messages(status);
 CREATE INDEX idx_contact_messages_created_at ON contact_messages(created_at DESC);
-
--- +go migrate Down
-DROP TABLE IF EXISTS contact_messages CASCADE;

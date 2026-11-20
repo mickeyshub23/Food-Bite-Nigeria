@@ -26,6 +26,3 @@ CREATE INDEX idx_orders_profile_id ON orders(profile_id);
 CREATE INDEX idx_orders_status ON orders(status);
 CREATE INDEX idx_orders_created_at ON orders(created_at DESC);
 CREATE INDEX idx_orders_order_number ON orders(order_number);
-
--- +go migrate Down
-DROP TABLE IF EXISTS orders CASCADE;

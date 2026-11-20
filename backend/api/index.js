@@ -30,7 +30,11 @@ app.use(limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Supabase client (service role)
+// Supabase client (service role) - validate env vars at startup
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.error('FATAL: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set in .env');
+  process.exit(1);
+}
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -988,10 +992,13 @@ app.use((req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
-if (process.argv[1] === new URL(import.meta.url).pathname) {
-  app.listen(PORT, () => {
-    console.log(`Food Bite Services API running on port ${PORT}`);
-  });
-}
 
 export default app;
+
+if (process.env.NODE_ENV !== 'production') {
+  const server = app.listen(PORT, () => {
+    console.log(`Food Bite Services API running on port ${PORT}`);
+  });
+  // Graceful shutdown for serverless
+  process.on('SIGTERM', () => server.close(() => process.exit(0)));
+}
