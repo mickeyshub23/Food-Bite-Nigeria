@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabase';
 import { apiFetch } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
-import Button from './components/Button';
-import StatusBadge from './components/StatusBadge';
-import CategoryChip from './components/CategoryChip';
-import EmptyState from './components/EmptyState';
-import Skeleton from './components/Skeleton';
+import Button from '../components/Button';
+import StatusBadge from '../components/StatusBadge';
+import CategoryChip from '../components/CategoryChip';
+import EmptyState from '../components/EmptyState';
+import Skeleton from '../components/Skeleton';
 
 const ProductManagement = () => {
   const { user } = useAuth();

@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabase';
 import { apiFetch } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
-import StatusBadge from './components/StatusBadge';
-import Skeleton from './components/Skeleton';
-import EmptyState from './components/EmptyState';
+import StatusBadge from '../components/StatusBadge';
+import Skeleton from '../components/Skeleton';
+import EmptyState from '../components/EmptyState';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
