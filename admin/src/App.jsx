@@ -18,9 +18,13 @@ const App = () => {
 };
 
 const Routes = () => {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   if (loading) return <div className="flex items-center justify-center h-screen">Loading...</div>;
   if (!user) return <LoginPage />;
+  if (profile?.role !== 'admin' && profile?.role !== 'staff') {
+    supabase.auth.signOut();
+    return <div className="flex items-center justify-center h-screen text-center">Access denied</div>;
+  }
   return <AdminDashboard />;
 };
 

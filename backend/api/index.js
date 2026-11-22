@@ -40,6 +40,77 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
+// Supabase anon client for JWT verification (uses service role for admin checks)
+const supabaseAnon = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
+// Middleware: Verify Supabase JWT from Authorization header
+async function requireAuth(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: { message: 'Authorization header required' } });
+  }
+
+  const token = authHeader.replace('Bearer ', '');
+  const { data: { user }, error } = await supabaseAnon.auth.getUser(token);
+
+  if (error || !user) {
+    return res.status(401).json({ error: { message: 'Invalid or expired token' } });
+  }
+
+  // Attach user to request
+  req.user = user;
+  next();
+}
+
+// Middleware: Require admin or staff role
+async function requireStaff(req, res, next) {
+  try {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', req.user.id)
+      .single();
+
+    if (!profile || (profile.role !== 'admin' && profile.role !== 'staff')) {
+      return res.status(403).json({ error: { message: 'Forbidden - staff or admin only' } });
+    }
+
+    req.profile = profile;
+    next();
+  } catch (err) {
+    res.status(500).json({ error: { message: err.message } });
+  }
+}
+
+// Helper: get settings value
+async function getSetting(key, defaultValue = null) {
+  const { data, error } = await supabase
+    .from('settings')
+    .select('value')
+    .eq('key', key)
+    .single();
+  if (error || !data) return defaultValue;
+  return data.value;
+}
+
+// Helper: calculate VAT
+function calculateVAT(amountKobo, vatRate) {
+  return Math.round(amountKobo * (parseFloat(vatRate) / 100));
+}
+
+// Legacy isAdmin (deprecated, use requireStaff)
+async function isAdmin(userId) {
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', userId)
+    .single();
+  return profile?.role === 'admin';
+}
+
 // Paystack configuration
 const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET_KEY;
 const PAYSTACK_BASE = 'https://api.paystack.co';
@@ -78,32 +149,6 @@ async function initializePaystackTransaction(email, amount, reference, callbackU
     })
   });
   return await response.json();
-}
-
-// Helper: get settings value
-async function getSetting(key, defaultValue = null) {
-  const { data, error } = await supabase
-    .from('settings')
-    .select('value')
-    .eq('key', key)
-    .single();
-  if (error || !data) return defaultValue;
-  return data.value;
-}
-
-// Helper: calculate VAT
-function calculateVAT(amountKobo, vatRate) {
-  return Math.round(amountKobo * (parseFloat(vatRate) / 100));
-}
-
-// Helper: check if user is admin
-async function isAdmin(userId) {
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', userId)
-    .single();
-  return profile?.role === 'admin';
 }
 
 // ========== HEALTH ==========
@@ -428,10 +473,18 @@ app.post('/api/orders', async (req, res) => {
 
     // Increment promo used_count
     if (promo_code) {
-      await supabase
+      const { data: promo } = await supabase
         .from('promo_codes')
-        .update({ used_count: supabase.rpc('increment', { used_count: 1 }) })
-        .eq('code', promo_code.toUpperCase());
+        .select('*')
+        .eq('code', promo_code.toUpperCase())
+        .single();
+
+      if (promo) {
+        await supabase
+          .from('promo_codes')
+          .update({ used_count: (promo.used_count || 0) + 1 })
+          .eq('id', promo.id);
+      }
     }
 
     res.status(201).json({ data: order });
@@ -764,19 +817,8 @@ app.post('/api/contact', async (req, res) => {
 });
 
 // ========== ADMIN ROUTES ==========
-// Middleware to check admin
-async function requireAdmin(req, res, next) {
-  const userId = req.headers['x-user-id'];
-  if (!userId) return res.status(401).json({ error: { message: 'Unauthorized' } });
-
-  const admin = await isAdmin(userId);
-  if (!admin) return res.status(403).json({ error: { message: 'Forbidden - admin only' } });
-
-  next();
-}
-
-// Admin: Dashboard stats
-app.get('/api/admin/stats', requireAdmin, async (req, res) => {
+// Use requireAuth + requireStaff for admin routes
+app.get('/api/admin/stats', requireAuth, requireStaff, async (req, res) => {
   try {
     const today = new Date().toISOString().split('T')[0];
 
@@ -821,7 +863,7 @@ app.get('/api/admin/stats', requireAdmin, async (req, res) => {
 });
 
 // Admin: Products CRUD
-app.get('/api/admin/products', requireAdmin, async (req, res) => {
+app.get('/api/admin/products', requireAuth, requireStaff, async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('products')
@@ -833,7 +875,7 @@ app.get('/api/admin/products', requireAdmin, async (req, res) => {
   }
 });
 
-app.post('/api/admin/products', requireAdmin, async (req, res) => {
+app.post('/api/admin/products', requireAuth, requireStaff, async (req, res) => {
   try {
     const product = req.body;
     const { data, error } = await supabase
@@ -848,7 +890,7 @@ app.post('/api/admin/products', requireAdmin, async (req, res) => {
   }
 });
 
-app.put('/api/admin/products/:id', requireAdmin, async (req, res) => {
+app.put('/api/admin/products/:id', requireAuth, requireStaff, async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('products')
@@ -863,7 +905,7 @@ app.put('/api/admin/products/:id', requireAdmin, async (req, res) => {
   }
 });
 
-app.delete('/api/admin/products/:id', requireAdmin, async (req, res) => {
+app.delete('/api/admin/products/:id', requireAuth, requireStaff, async (req, res) => {
   try {
     const { error } = await supabase
       .from('products')
@@ -877,11 +919,11 @@ app.delete('/api/admin/products/:id', requireAdmin, async (req, res) => {
 });
 
 // Admin: Orders management
-app.get('/api/admin/orders', requireAdmin, async (req, res) => {
+app.get('/api/admin/orders', requireAuth, requireStaff, async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('orders')
-      .select('*, order_items(*), profiles(name, email)')
+      .select('*, order_items(*), profiles(name)')
       .order('created_at', { ascending: false });
     if (error) throw error;
     res.json({ data });
@@ -890,7 +932,7 @@ app.get('/api/admin/orders', requireAdmin, async (req, res) => {
   }
 });
 
-app.put('/api/admin/orders/:id', requireAdmin, async (req, res) => {
+app.put('/api/admin/orders/:id', requireAuth, requireStaff, async (req, res) => {
   try {
     const { status } = req.body;
     const validStatuses = ['pending', 'preparing', 'on_the_way', 'delivered', 'cancelled'];
@@ -913,7 +955,7 @@ app.put('/api/admin/orders/:id', requireAdmin, async (req, res) => {
 });
 
 // Admin: Categories
-app.get('/api/admin/categories', requireAdmin, async (req, res) => {
+app.get('/api/admin/categories', requireAuth, requireStaff, async (req, res) => {
   try {
     const { data, error } = await supabase.from('categories').select('*');
     if (error) throw error;
@@ -923,7 +965,7 @@ app.get('/api/admin/categories', requireAdmin, async (req, res) => {
   }
 });
 
-app.post('/api/admin/categories', requireAdmin, async (req, res) => {
+app.post('/api/admin/categories', requireAuth, requireStaff, async (req, res) => {
   try {
     const { data, error } = await supabase.from('categories').insert(req.body).select().single();
     if (error) throw error;
@@ -934,7 +976,7 @@ app.post('/api/admin/categories', requireAdmin, async (req, res) => {
 });
 
 // Admin: Delivery zones
-app.get('/api/admin/delivery-zones', requireAdmin, async (req, res) => {
+app.get('/api/admin/delivery-zones', requireAuth, requireStaff, async (req, res) => {
   try {
     const { data, error } = await supabase.from('delivery_zones').select('*');
     if (error) throw error;
@@ -944,7 +986,7 @@ app.get('/api/admin/delivery-zones', requireAdmin, async (req, res) => {
   }
 });
 
-app.post('/api/admin/delivery-zones', requireAdmin, async (req, res) => {
+app.post('/api/admin/delivery-zones', requireAuth, requireStaff, async (req, res) => {
   try {
     const { data, error } = await supabase.from('delivery_zones').insert(req.body).select().single();
     if (error) throw error;
@@ -955,7 +997,7 @@ app.post('/api/admin/delivery-zones', requireAdmin, async (req, res) => {
 });
 
 // Admin: Promo codes
-app.get('/api/admin/promo-codes', requireAdmin, async (req, res) => {
+app.get('/api/admin/promo-codes', requireAuth, requireStaff, async (req, res) => {
   try {
     const { data, error } = await supabase.from('promo_codes').select('*');
     if (error) throw error;
@@ -965,7 +1007,7 @@ app.get('/api/admin/promo-codes', requireAdmin, async (req, res) => {
   }
 });
 
-app.post('/api/admin/promo-codes', requireAdmin, async (req, res) => {
+app.post('/api/admin/promo-codes', requireAuth, requireStaff, async (req, res) => {
   try {
     const { data, error } = await supabase.from('promo_codes').insert(req.body).select().single();
     if (error) throw error;

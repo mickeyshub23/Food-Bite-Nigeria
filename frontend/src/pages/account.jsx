@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../utils/supabase';
 import { apiFetch } from '../utils/supabase';
 import EmptyState from '../components/EmptyState';
@@ -13,6 +13,8 @@ const AccountPage = () => {
   const [addresses, setAddresses] = useState([]);
   const [activeTab, setActiveTab] = useState('orders');
   const [loading, setLoading] = useState(true);
+  const [showLogin, setShowLogin] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadAccount();
@@ -34,6 +36,7 @@ const AccountPage = () => {
       if (userError || !user) {
         finish();
         clearTimeout(timeout);
+        setShowLogin(true);
         return;
       }
 
@@ -57,9 +60,37 @@ const AccountPage = () => {
       setAddresses(addrs || []);
     } catch (err) {
       console.error('Failed to load account', err);
+      setShowLogin(true);
     } finally {
       clearTimeout(timeout);
       finish();
+    }
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const email = form.email.value;
+    const password = form.password.value;
+    
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (!error) {
+      setShowLogin(false);
+      loadAccount();
+    }
+  };
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const email = form.email.value;
+    const password = form.password.value;
+    const fullName = form.fullName.value;
+    
+    const { error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: fullName } } });
+    if (!error) {
+      setShowLogin(false);
+      loadAccount();
     }
   };
 
@@ -69,6 +100,43 @@ const AccountPage = () => {
         <div className="text-center">
           <div className="w-12 h-12 rounded-lg bg-gray-200 animate-pulse mb-4 mx-auto" />
           <p className="text-sm text-medium_gray">Loading account...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (showLogin || !profile) {
+    return (
+      <div className="min-h-screen bg-warm_off_white flex items-center justify-center py-12 px-4">
+        <div className="w-full max-w-md bg-white rounded-card border border-border p-8">
+          <h2 className="font-headline font-bold text-2xl text-dark_gray mb-6 text-center">Sign in to your account</h2>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-dark_gray mb-1">Email</label>
+              <input name="email" type="email" required className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-rust" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-dark_gray mb-1">Password</label>
+              <input name="password" type="password" required className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-rust" />
+            </div>
+            <button type="submit" className="w-full bg-rust text-white py-2 rounded-lg font-medium hover:bg-rust/90 transition-colors">Sign in</button>
+          </form>
+          <p className="text-center text-sm text-medium_gray mt-6">Don't have an account? </p>
+          <form onSubmit={handleSignup} className="space-y-4 mt-4 pt-4 border-t border-border">
+            <div>
+              <label className="block text-sm font-medium text-dark_gray mb-1">Full Name</label>
+              <input name="fullName" type="text" required className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-rust" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-dark_gray mb-1">Email</label>
+              <input name="email" type="email" required className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-rust" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-dark_gray mb-1">Password</label>
+              <input name="password" type="password" required minLength="6" className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-rust" />
+            </div>
+            <button type="submit" className="w-full bg-rust text-white py-2 rounded-lg font-medium hover:bg-rust/90 transition-colors">Create account</button>
+          </form>
         </div>
       </div>
     );
