@@ -55,6 +55,7 @@ const HomePage = () => {
     // Promo code
     const { data: p, error: pError } = await supabase
       .from('promo_codes')
+      .select('*')
       .eq('active', true)
       .single();
     if (!pError && p) setPromo(p);

@@ -19,29 +19,48 @@ const AccountPage = () => {
   }, []);
 
   const loadAccount = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    let finished = false;
+    const finish = () => {
+      if (!finished) {
+        finished = true;
+        setLoading(false);
+      }
+    };
 
-    // Profile
-    const { data: prof } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-    setProfile(prof);
+    const timeout = setTimeout(finish, 8000);
 
-    // Orders
-    const { data: ords } = await apiFetch('/api/orders');
-    setOrders(ords?.data || []);
+    try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        finish();
+        clearTimeout(timeout);
+        return;
+      }
 
-    // Addresses
-    const { data: addrs } = await supabase
-      .from('addresses')
-      .select('*')
-      .eq('profile_id', user.id);
-    setAddresses(addrs || []);
+      // Profile
+      const { data: prof } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      setProfile(prof);
 
-    setLoading(false);
+      // Orders
+      const { data: ords } = await apiFetch('/api/orders');
+      setOrders(ords?.data || []);
+
+      // Addresses
+      const { data: addrs } = await supabase
+        .from('addresses')
+        .select('*')
+        .eq('profile_id', user.id);
+      setAddresses(addrs || []);
+    } catch (err) {
+      console.error('Failed to load account', err);
+    } finally {
+      clearTimeout(timeout);
+      finish();
+    }
   };
 
   if (loading) {
