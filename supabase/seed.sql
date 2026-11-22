@@ -1,52 +1,95 @@
 -- seed.sql for Food Bite Services
--- Run after migrations
+-- Run after all migrations (001-019) are applied.
 
--- Enable pgvector if needed (not used here)
-
--- Categories
+-- ---- CATEGORIES ----
 INSERT INTO categories (name, slug, description, display_order) VALUES
-  ('Rice & Grains', 'rice-grains', 'Essential staples', 1),
-  ('Soups & Stews', 'soups-stews', 'Traditional Nigerian soups', 2),
-  ('Meats & Fish', 'meats-fish', 'Fresh protein selections', 3),
-  ('Vegetables & Fruits', 'vegetables-fruits', 'Fresh produce', 4),
-  ('Spices & Seasonings', 'spices-seasonings', 'Authentic flavours', 5);
+  ('Rice Dishes', 'rice-dishes', 'Delicious Nigerian rice specialties', 1),
+  ('Soups & Stews', 'soups-stews', 'Traditional soups and stews', 2),
+  ('Grills & Suya', 'grills-suya', 'Grilled meats and spicy suya', 3),
+  ('Snacks & Sides', 'snacks-sides', 'Popular Nigerian snacks', 4),
+  ('Drinks', 'drinks', 'Refreshing beverages', 5)
+ON CONFLICT (slug) DO NOTHING;
 
--- Products (9 dishes from designs: 1 sold-out, 1 low-stock)
--- Prices in kobo (1 ₦ = 100 kobo), price formatting: ₦1,200 etc.
--- category_id uses subqueries to look up the UUID by slug
+-- ---- PRODUCTS (12+ items, prices in kobo) ----
 INSERT INTO products (slug, name, description, price_kobo, stock, low_stock_threshold, availability, category_id, portion_size, dietary_tags, region, is_featured, is_active, rating, rating_count) VALUES
-  ('jollof-rice', 'Jollof Rice', 'Party jollof with tomatoes and peppers', 180000, 12, 5, 'in_stock', (SELECT id FROM categories WHERE slug = 'rice-grains'), 'large', '{vegetarian}', 'lagos', true, true, 4.7, 842),
-  ('eba-and-egusi', 'Eba & Egusi Soup', 'Pounded yam alternative with melon seeds', 150000, 8, 5, 'low_stock', (SELECT id FROM categories WHERE slug = 'soups-stews'), 'medium', '{gluten-free}', 'ogun', false, true, 4.5, 631),
-  ('ofe-akwu', 'Ofe Akwu (Palm Fruit Stew)', 'Rich palm fruit stew with smoked fish', 220000, 3, 5, 'sold_out', (SELECT id FROM categories WHERE slug = 'soups-stews'), 'large', '{contains-fish}', 'delta', false, true, 4.8, 214),
-  ('pounded-yam', 'Pounded Yam', 'Smooth pounded yam with vegetable soup', 200000, 15, 5, 'in_stock', (SELECT id FROM categories WHERE slug = 'soups-stews'), 'large', '', 'osun', false, true, 4.6, 712),
-  ('akara', 'Akara (Bean Cakes)', 'Fried bean cakes, breakfast favourite', 30000, 20, 5, 'in_stock', (SELECT id FROM categories WHERE slug = 'vegetables-fruits'), 'small', '{vegan, gluten-free}', 'lagos', true, true, 4.3, 319),
-  ('suya', 'Suya (Spiced Beef)', 'Grilled spiced beef skewers', 25000, 10, 5, 'in_stock', (SELECT id FROM categories WHERE slug = 'meats-fish'), 'medium', '{contains-nuts}', 'kano', false, true, 4.4, 487),
-  ('fufu', 'Fufu & Egusi', 'Classic fufu with melon seed soup', 230000, 6, 5, 'low_stock', (SELECT id FROM categories WHERE slug = 'soups-stews'), 'large', '', 'cross_river', false, true, 4.6, 198),
-  ('izak', 'Izak (Smoked Fish)', 'Freshly smoked catfish', 8000, 25, 5, 'in_stock', (SELECT id FROM categories WHERE slug = 'meats-fish'), 'small', '', 'river_state', false, true, 4.2, 156),
-  ('kulikuli', 'Kulikuli (Groundnut Cake)', 'Crunchy groundnut snack', 5000, 30, 5, 'in_stock', (SELECT id FROM categories WHERE slug = 'spices-seasonings'), 'small', '{vegan}', 'lagos', false, true, 4.1, 283);
+  -- Rice Dishes
+  ('jollof-rice', 'Party Jollof Rice', 'Classic Nigerian party jollof with tomatoes, peppers & spices', 180000, 12, 5, 'in_stock',
+   (SELECT id FROM categories WHERE slug = 'rice-dishes'), 'large', ARRAY['vegetarian'], 'lagos', true, true, 4.7, 842),
 
--- Delivery zones
+  ('fried-rice', 'Nigerian Fried Rice', 'Colorful fried rice with mixed vegetables & liver', 170000, 15, 5, 'in_stock',
+   (SELECT id FROM categories WHERE slug = 'rice-dishes'), 'large', ARRAY['vegetarian'], 'abuja', true, true, 4.6, 521),
+
+  ('coconut-rice', 'Coconut Rice', 'Fragrant rice cooked in coconut milk with shrimp', 210000, 8, 5, 'in_stock',
+   (SELECT id FROM categories WHERE slug = 'rice-dishes'), 'large', ARRAY['contains-shellfish'], 'cross_river', false, true, 4.8, 198),
+
+  -- Soups & Stews
+  ('egusi-soup', 'Egusi Soup with Pounded Yam', 'Melon seed soup with assorted meat & vegetables', 150000, 10, 5, 'in_stock',
+   (SELECT id FROM categories WHERE slug = 'soups-stews'), 'large', ARRAY['gluten-free'], 'ogun', true, true, 4.7, 631),
+
+  ('ewedu-amala', 'Ewedu & Amala', 'Green jute leaf soup with yam flour swallow', 130000, 20, 5, 'in_stock',
+   (SELECT id FROM categories WHERE slug = 'soups-stews'), 'medium', ARRAY['vegan', 'gluten-free'], 'osun', false, true, 4.5, 412),
+
+  ('ofe-akwu', 'Ofe Akwu (Palm Fruit Stew)', 'Rich palm fruit stew with smoked fish & scent leaves', 220000, 6, 5, 'low_stock',
+   (SELECT id FROM categories WHERE slug = 'soups-stews'), 'large', ARRAY['contains-fish'], 'delta', false, true, 4.8, 214),
+
+  -- Grills & Suya
+  ('suya-beef', 'Suya (Spiced Beef Skewers)', 'Grilled beef with yaji spice, onions & tomatoes', 250000, 25, 5, 'in_stock',
+   (SELECT id FROM categories WHERE slug = 'grills-suya'), 'medium', ARRAY['contains-nuts'], 'kano', true, true, 4.6, 789),
+
+  ('suya-chicken', 'Chicken Suya', 'Grilled chicken thighs with traditional suya spice', 230000, 18, 5, 'in_stock',
+   (SELECT id FROM categories WHERE slug = 'grills-suya'), 'medium', ARRAY['contains-nuts'], 'kaduna', true, true, 4.5, 345),
+
+  ('grilled-fish', 'Grilled Croaker Fish', 'Whole grilled fish with pepper sauce', 350000, 8, 5, 'in_stock',
+   (SELECT id FROM categories WHERE slug = 'grills-suya'), 'large', ARRAY['contains-fish'], 'lagos', false, true, 4.9, 156),
+
+  -- Snacks & Sides
+  ('akara', 'Akara (Bean Cakes)', 'Crispy fried bean cakes, perfect for breakfast', 30000, 30, 5, 'in_stock',
+   (SELECT id FROM categories WHERE slug = 'snacks-sides'), 'small', ARRAY['vegan', 'gluten-free'], 'lagos', true, true, 4.4, 512),
+
+  ('moin-moin', 'Moin Moin (Steamed Bean Pudding)', 'Steamed bean pudding with fish & eggs', 80000, 20, 5, 'in_stock',
+   (SELECT id FROM categories WHERE slug = 'snacks-sides'), 'medium', ARRAY['contains-fish', 'contains-eggs'], 'osun', false, true, 4.3, 287),
+
+  ('puff-puff', 'Puff Puff', 'Sweet fried dough balls, Nigerian style', 15000, 50, 5, 'in_stock',
+   (SELECT id FROM categories WHERE slug = 'snacks-sides'), 'small', ARRAY['vegetarian'], 'lagos', false, true, 4.2, 423),
+
+  -- Drinks
+  ('zobo-drink', 'Zobo (Hibiscus Drink)', 'Refreshing hibiscus drink with ginger & pineapple', 12000, 40, 5, 'in_stock',
+   (SELECT id FROM categories WHERE slug = 'drinks'), 'medium', ARRAY['vegan', 'gluten-free'], 'north', false, true, 4.5, 189),
+
+  ('kunu', 'Kunu (Millet Drink)', 'Traditional fermented millet drink', 10000, 35, 5, 'in_stock',
+   (SELECT id FROM categories WHERE slug = 'drinks'), 'medium', ARRAY['vegan', 'gluten-free'], 'kano', false, true, 4.3, 134)
+
+ON CONFLICT (slug) DO NOTHING;
+
+-- ---- DELIVERY ZONES ----
 INSERT INTO delivery_zones (name, fee_kobo, min_order_kobo, estimated_days, is_active) VALUES
-  ('Lagos Mainland', 50000, 200000, 1, true),   -- ₦500
-  ('Ibadan', 70000, 200000, 2, true),        -- ₦700
-  ('Abuja', 80000, 200000, 2, true);         -- ₦800
+  ('Lagos Mainland', 50000, 200000, 1, true),
+  ('Lagos Island', 60000, 200000, 1, true),
+  ('Ibadan', 70000, 200000, 2, true),
+  ('Abuja', 80000, 200000, 2, true),
+  ('Port Harcourt', 90000, 250000, 2, true)
+ON CONFLICT (name) DO NOTHING;
 
--- Settings (store as key-value pairs)
+-- ---- SETTINGS ----
 INSERT INTO settings (key, value, description) VALUES
   ('site_name', 'Food Bite Services', ''),
   ('vat_rate', '7.5', 'VAT percentage rate'),
-  ('cooler_deposit', '500', 'Thermal cooler box deposit in naira'),
-  ('promo_naijafeast', 'NAIJAFEAST|15|25000|', 'Promo code: NAIJAFEAST gives 15% off min order ₦25,000'),
+  ('cooler_deposit_kobo', '50000', 'Thermal cooler box deposit in kobo (₦500)'),
   ('footer_year', '2026', 'Current year for footer'),
-  ('phone', '+234-XXXX-XXXX', 'Contact phone (set actual value)'),
-  ('address', 'Kano, Nigeria', 'Business address');
+  ('phone', '+234-800-FOOD-BITE', 'Contact phone'),
+  ('address', 'Lagos, Nigeria', 'Business address')
+ON CONFLICT (key) DO NOTHING;
 
--- Testimonials
-INSERT INTO testimonials (name, location, rating, content, avatar_url, display_order) VALUES
-  ('Adanna S.', 'Lagos', 5, 'The Jollof Rice is absolutely authentic - tastes just like home!', '/placeholder-user-1.jpg', 1),
-  ('Chidi O.', 'Abuja', 4, 'Great variety and fast delivery. The Eba & Egusi was delicious.', '/placeholder-user-2.jpg', 2),
-  ('Funmi K.', 'Ibadan', 5, 'Perfect for busy families. Always fresh and well-packaged.', '/placeholder-user-3.jpg', 3);
+-- ---- TESTIMONIALS ----
+INSERT INTO testimonials (name, location, rating, content, display_order) VALUES
+  ('Adanna S.', 'Lagos', 5, 'The Party Jollof Rice is absolutely authentic – tastes just like my mum''s!', 1),
+  ('Chidi O.', 'Abuja', 5, 'Best suya delivery in Abuja. The yaji spice is perfect.', 2),
+  ('Funmi K.', 'Ibadan', 4, 'Great variety and fast delivery. The Ewedu & Amala was delicious.', 3),
+  ('Tunde A.', 'Port Harcourt', 5, 'Fresh grilled fish, well packaged. Will order again.', 4),
+  ('Ngozi E.', 'Enugu', 4, 'Loved the Zobo drink – refreshing and not too sweet.', 5)
+ON CONFLICT DO NOTHING;
 
--- Promo code: NAIJAFEAST (15% off, minimum order ₦25,000)
+-- ---- PROMO CODE (active, 15% off min ₦25,000) ----
 INSERT INTO promo_codes (code, percent, min_order_kobo, starts_at, ends_at, active, max_uses) VALUES
-  ('NAIJAFEAST', 15.00, 2500000, NOW() - INTERVAL '30 days', NOW() + INTERVAL '365 days', true, 1000);
+  ('NAIJAFEAST', 15.00, 2500000, NOW() - INTERVAL '30 days', NOW() + INTERVAL '365 days', true, 1000)
+ON CONFLICT (code) DO NOTHING;
