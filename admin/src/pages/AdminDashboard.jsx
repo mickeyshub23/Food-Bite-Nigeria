@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabase';
-import { apiFetch } from '../utils/api';
+import { apiFetch } from '../utils/supabase';
 import { useAuth } from '../context/AuthContext';
 import StatusBadge from '../components/StatusBadge';
 import Skeleton from '../components/Skeleton';

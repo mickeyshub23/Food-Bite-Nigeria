@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../utils/supabase';
-import { apiFetch } from '../utils/api';
+import { apiFetch } from '../utils/supabase';
 
 const ContactPage = () => {
   const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });

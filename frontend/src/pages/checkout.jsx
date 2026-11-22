@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { apiFetch } from '../utils/api';
-import { supabase } from '../utils/supabase';
+import { apiFetch, supabase } from '../utils/supabase';
 import EmptyState from '../components/EmptyState';
+
+const formatNaira = (kobo) => '₦' + Math.round(kobo / 100).toLocaleString();
 
 const CheckoutPage = () => {
   const { items, total, itemCount } = useCart();
@@ -23,12 +24,16 @@ const CheckoutPage = () => {
   const [selectedQuote, setSelectedQuote] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { profile } = useState(() => null);
+  const [profile, setProfile] = useState(null);
 
   useEffect(() => {
-    if (!profile) {
-      const { data: { session} } = supabase.auth.getSession();
-    }
+    const loadProfile = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setProfile({ email: session.user.email });
+      }
+    };
+    loadProfile();
   }, []);
 
   const loadDeliveryQuotes = async () => {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { supabase } from '../utils/supabase';
-import { apiFetch } from '../utils/api';
+import { apiFetch } from '../utils/supabase';
 import EmptyState from '../components/EmptyState';
 import OrderCard from '../components/OrderCard';
 import StatusBadge from '../components/StatusBadge';

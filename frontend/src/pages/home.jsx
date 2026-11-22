@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useSearchParams, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../utils/supabase';
 import CategoryChip from '../components/CategoryChip';
 import StatusBadge from '../components/StatusBadge';
@@ -7,7 +7,7 @@ import FilterSidebar from '../components/FilterSidebar';
 import Breadcrumb from '../components/Breadcrumb';
 import FloatingBasketBar from '../components/FloatingBasketBar';
 import ProductCard from '../components/ProductCard';
-import { apiFetch } from '../utils/api';
+import { apiFetch } from '../utils/supabase';
 import { useCart } from '../context/CartContext';
 
 const HomePage = () => {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../utils/supabase';
-import { apiFetch } from '../utils/api';
+import { apiFetch } from '../utils/supabase';
 import ProductCard from '../components/ProductCard';
 import StatusBadge from '../components/StatusBadge';
 import { useCart } from '../context/CartContext';
