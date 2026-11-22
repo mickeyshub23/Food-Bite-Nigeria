@@ -28,13 +28,25 @@ export async function apiFetch(path, options = {}) {
     ...(options.headers || {}),
   };
 
-  const response = await fetch(`${API_URL}${path}`, {
-    headers,
-    ...options,
-    credentials: 'include',
-  });
+  let response;
+  try {
+    response = await fetch(`${API_URL}${path}`, {
+      headers,
+      ...options,
+      credentials: 'include',
+    });
+  } catch (networkErr) {
+    throw new Error('Unable to reach the server. Please check your internet connection and try again.');
+  }
+
   const data = await response.json();
   if (!response.ok) {
+    if (response.status === 403) {
+      throw new Error('Access denied. You do not have permission for this action.');
+    }
+    if (response.status === 401) {
+      throw new Error('Session expired. Please sign in again.');
+    }
     throw new Error(data?.error?.message || `Request failed: ${response.status}`);
   }
   return data;

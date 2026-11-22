@@ -18,7 +18,8 @@ const CheckoutPage = () => {
     state: '',
     postalCode: '',
     deliveryZoneId: null,
-    promoCode: ''
+    promoCode: '',
+    promoValid: null,  // { valid: boolean, code?: string, discount?: number, message?: string }
   });
   const [deliveryQuotes, setDeliveryQuotes] = useState([]);
   const [selectedQuote, setSelectedQuote] = useState(null);
@@ -282,18 +283,33 @@ const CheckoutPage = () => {
                     <button
                       type="button"
                       className="px-4 py-3 bg-rust text-white font-headline font-semibold rounded-md"
-                      onClick={() => apiFetch('/api/promo/validate', {
-                        method: 'POST',
-                        body: JSON.stringify({ code: form.promoCode, order_total_kobo: total })
-                      })}
+                      onClick={async () => {
+                        try {
+                          const result = await apiFetch('/api/promo/validate', {
+                            method: 'POST',
+                            body: JSON.stringify({ code: form.promoCode, order_total_kobo: total })
+                          });
+                          setForm(prev => ({ ...prev, promoValid: result || null }));
+                        } catch (err) {
+                          setForm(prev => ({ ...prev, promoValid: { valid: false, message: err.message || 'Invalid promo code' } }));
+                        }
+                      }}
                     >
                       Validate
                     </button>
                   </div>
-                  {form.promoCode && (
-                    <p className="mt-2 text-sm text-amber-600">
-                      {form.promoCode} gives {parseFloat(form.promoCode.percent || 0)}% off orders above ₦25,000
-                    </p>
+                  {form.promoValid && (
+                    <>
+                      {form.promoValid.valid ? (
+                        <p className="mt-2 text-sm text-amber-600">
+                          {form.promoValid.message || `${form.promoValid.code} gives ${parseFloat(form.promoValid.discount_value || 0)}% off`}
+                        </p>
+                      ) : (
+                        <p className="mt-2 text-sm text-red-600">
+                          {form.promoValid.message || 'Invalid promo code'}
+                        </p>
+                      )}
+                    </>
                   )}
                 </div>
 

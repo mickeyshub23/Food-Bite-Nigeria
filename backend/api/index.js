@@ -348,7 +348,52 @@ app.post('/api/promo/validate', async (req, res) => {
       return res.status(400).json({ error: { message: `Minimum order ${formatNaira(promo.min_order_kobo)} required` } });
     }
 
-    res.json({ data: { code: promo.code, percent: parseFloat(promo.percent), discount_type: 'percentage' } });
+    res.json({
+      valid: true,
+      code: promo.code,
+      discount_type: 'percentage',
+      discount_value: parseFloat(promo.percent),
+      message: `${promo.code} gives ${parseFloat(promo.percent)}% off`,
+    });
+  } catch (err) {
+    res.status(500).json({ error: { message: err.message } });
+  }
+});
+
+// ========== ACTIVE PROMO (for home banner) ==========
+app.get('/api/promo/active', async (req, res) => {
+  try {
+    const now = new Date().toISOString();
+    const { data: promos, error } = await supabase
+      .from('promo_codes')
+      .select('code, percent, description, min_order_kobo, starts_at, ends_at, max_uses, used_count, active')
+      .eq('active', true)
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    if (error || !promos || promos.length === 0) {
+      return res.json({ data: null });
+    }
+
+    const promo = promos[0];
+    if (promo.starts_at && new Date(promo.starts_at) > new Date()) {
+      return res.json({ data: null });
+    }
+    if (promo.ends_at && new Date(promo.ends_at) < new Date()) {
+      return res.json({ data: null });
+    }
+    if (promo.max_uses && promo.used_count >= promo.max_uses) {
+      return res.json({ data: null });
+    }
+
+    res.json({
+      data: {
+        code: promo.code,
+        percent: parseFloat(promo.percent),
+        description: promo.description,
+        min_order_kobo: promo.min_order_kobo,
+      },
+    });
   } catch (err) {
     res.status(500).json({ error: { message: err.message } });
   }
@@ -379,7 +424,7 @@ app.get('/api/delivery/quote', async (req, res) => {
 
 // ========== ORDERS ==========
 // Create order (checkout)
-app.post('/api/orders', async (req, res) => {
+app.post('/api/orders', requireAuth, async (req, res) => {
   try {
     const { items, delivery_address, delivery_zone_id, promo_code, contact_email, contact_phone, notes } = req.body;
 
@@ -475,7 +520,7 @@ app.post('/api/orders', async (req, res) => {
       .from('orders')
       .insert({
         order_number: orderNumber,
-        profile_id: req.headers['x-user-id'] || null,
+        profile_id: req.user.id,
         subtotal_kobo: subtotal,
         discount_kobo: discount,
         delivery_fee_kobo: deliveryFee,
@@ -525,15 +570,12 @@ app.post('/api/orders', async (req, res) => {
 });
 
 // Get orders for current user
-app.get('/api/orders', async (req, res) => {
+app.get('/api/orders', requireAuth, async (req, res) => {
   try {
-    const userId = req.headers['x-user-id'];
-    if (!userId) return res.status(401).json({ error: { message: 'Unauthorized' } });
-
     const { data, error } = await supabase
       .from('orders')
-      .select('*, order_items(*)')
-      .eq('profile_id', userId)
+      .select('*, order_items(*), profiles(name)')
+      .eq('profile_id', req.user.id)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -561,7 +603,7 @@ app.get('/api/orders/:id', async (req, res) => {
 
 // ========== PAYMENTS ==========
 // Initialize payment
-app.post('/api/payments/initialize', async (req, res) => {
+app.post('/api/payments/initialize', requireAuth, async (req, res) => {
   try {
     const { order_id, email } = req.body;
     if (!order_id || !email) {
@@ -606,7 +648,7 @@ app.post('/api/payments/initialize', async (req, res) => {
 });
 
 // Verify payment (callback)
-app.get('/api/payments/verify', async (req, res) => {
+app.get('/api/payments/verify', requireAuth, async (req, res) => {
   try {
     const { reference } = req.query;
     if (!reference) return res.status(400).json({ error: { message: 'Reference required' } });
@@ -751,15 +793,12 @@ app.post('/api/payments/webhook', express.raw({ type: 'application/json' }), asy
 });
 
 // ========== ADDRESSES ==========
-app.get('/api/addresses', async (req, res) => {
+app.get('/api/addresses', requireAuth, async (req, res) => {
   try {
-    const userId = req.headers['x-user-id'];
-    if (!userId) return res.status(401).json({ error: { message: 'Unauthorized' } });
-
     const { data, error } = await supabase
       .from('addresses')
       .select('*')
-      .eq('profile_id', userId)
+      .eq('profile_id', req.user.id)
       .order('is_default', { ascending: false });
 
     if (error) throw error;
@@ -769,12 +808,9 @@ app.get('/api/addresses', async (req, res) => {
   }
 });
 
-app.post('/api/addresses', async (req, res) => {
+app.post('/api/addresses', requireAuth, async (req, res) => {
   try {
-    const userId = req.headers['x-user-id'];
-    if (!userId) return res.status(401).json({ error: { message: 'Unauthorized' } });
-
-    const address = { ...req.body, profile_id: userId };
+    const address = { ...req.body, profile_id: req.user.id };
     const { data, error } = await supabase
       .from('addresses')
       .insert(address)
@@ -788,16 +824,13 @@ app.post('/api/addresses', async (req, res) => {
   }
 });
 
-app.put('/api/addresses/:id', async (req, res) => {
+app.put('/api/addresses/:id', requireAuth, async (req, res) => {
   try {
-    const userId = req.headers['x-user-id'];
-    if (!userId) return res.status(401).json({ error: { message: 'Unauthorized' } });
-
     const { data, error } = await supabase
       .from('addresses')
       .update(req.body)
       .eq('id', req.params.id)
-      .eq('profile_id', userId)
+      .eq('profile_id', req.user.id)
       .select()
       .single();
 
@@ -808,16 +841,13 @@ app.put('/api/addresses/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/addresses/:id', async (req, res) => {
+app.delete('/api/addresses/:id', requireAuth, async (req, res) => {
   try {
-    const userId = req.headers['x-user-id'];
-    if (!userId) return res.status(401).json({ error: { message: 'Unauthorized' } });
-
     const { error } = await supabase
       .from('addresses')
       .delete()
       .eq('id', req.params.id)
-      .eq('profile_id', userId);
+      .eq('profile_id', req.user.id);
 
     if (error) throw error;
     res.json({ message: 'Address deleted' });

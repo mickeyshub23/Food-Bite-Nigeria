@@ -15,6 +15,7 @@ const HomePage = () => {
   const [products, setProducts] = useState([]);
   const [promo, setPromo] = useState(null);
   const [testimonials, setTestimonials] = useState([]);
+  const [loadError, setLoadError] = useState('');
   const { addItem } = useCart();
   const navigate = useNavigate();
 
@@ -23,6 +24,8 @@ const HomePage = () => {
   }, []);
 
   const loadData = async () => {
+    setLoadError('');
+
     // Categories
     const { data: cats, error: catError } = await supabase
       .from('categories')
@@ -52,13 +55,17 @@ const HomePage = () => {
     if (tError) console.error(tError);
     else setTestimonials(t || []);
 
-    // Promo code
-    const { data: p, error: pError } = await supabase
-      .from('promo_codes')
-      .select('*')
-      .eq('active', true)
-      .single();
-    if (!pError && p) setPromo(p);
+    // Promo banner (server-side, never reads promo_codes directly)
+    try {
+      const promoRes = await apiFetch('/api/promo/active');
+      if (promoRes?.data) setPromo(promoRes.data);
+    } catch (err) {
+      console.error('Promo unavailable', err);
+    }
+
+    if (catError || bestError || tError) {
+      setLoadError('Some content failed to load. Please check your connection and refresh.');
+    }
   };
 
   const handleAddToCart = async (product) => {
@@ -87,6 +94,13 @@ const HomePage = () => {
       </nav>
 
       {/* Hero section */}
+      {loadError && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4">
+          <div className="bg-red-50 border border-red-200 rounded-md p-3 text-red-700 text-sm">
+            {loadError}
+          </div>
+        </div>
+      )}
       <section className="py-12 md:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-8 items-center">
