@@ -30,9 +30,6 @@ const PaymentCallbackPage = () => {
       if (apiError) throw new Error(apiError.message);
       setStatus(data.data.status);
       setOrder(data.data.order);
-      if (data.data.status === 'success') {
-        setSuccess(true);
-      }
     } catch (err) {
       console.error(err);
       setError(err.message || 'Verification failed');

@@ -3,6 +3,8 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../utils/supabase';
 import { apiFetch } from '../utils/supabase';
 import ProductCard from '../components/ProductCard';
+import QuantityStepper from '../components/QuantityStepper';
+import Button from '../components/Button';
 import StatusBadge from '../components/StatusBadge';
 import { useCart } from '../context/CartContext';
 
@@ -139,16 +141,7 @@ const ProductPage = () => {
               {product.availability === 'sold_out' ? 'Sold out' : 'Add to cart'}
             </Button>
 
-            {/* Related products */}
-            <div className="mt-8">
-              <h2 className="font-label font-semibold text-medium_gray mb-4">Related items</h2>
-              <div className="grid grid-cols-2 gap-4">
-                {products.slice(0, 4).map((p) => (
-                  <ProductCard key={p.id} product={p} onAddToCart={handleAddToCart} />
-                ))}
-              </div>
             </div>
-          </div>
         </div>
       </main>
     </div>
