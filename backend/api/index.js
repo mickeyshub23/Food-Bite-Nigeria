@@ -12,11 +12,42 @@ const app = express();
 // Trust proxy for Vercel
 app.set('trust proxy', 1);
 
+// Build allowed CORS origins from comma-separated FRONTEND_URL
+function getAllowedOrigins() {
+  const raw = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const origins = raw
+    .split(',')
+    .map((origin) => origin.trim().replace(/\/+$/, ''))
+    .filter(Boolean);
+
+  // Always allow local Vite dev server outside production
+  if (process.env.NODE_ENV !== 'production' && !origins.includes('http://localhost:5173')) {
+    origins.push('http://localhost:5173');
+  }
+
+  return origins;
+}
+
+const allowedOrigins = getAllowedOrigins();
+
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true
+  origin(origin, callback) {
+    // Allow requests with no Origin header (server-to-server, curl, health checks)
+    if (!origin) return callback(null, true);
+
+    const normalized = origin.trim().replace(/\/+$/, '');
+    if (allowedOrigins.includes(normalized)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error(`CORS: origin ${origin} not allowed`));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 204,
 }));
 
 // Rate limiting
