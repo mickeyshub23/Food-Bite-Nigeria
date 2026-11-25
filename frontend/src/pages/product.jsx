@@ -10,6 +10,7 @@ const ProductPage = () => {
   const { slug } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
 
   useEffect(() => {
@@ -35,13 +36,24 @@ const ProductPage = () => {
 
   const formatNaira = (kobo) => '₦' + Math.round(kobo / 100).toLocaleString();
 
-  if (!product || loading) {
+  if (!product) {
     return (
       <div className="min-h-screen bg-warm_off_white flex items-center justify-center">
         <div className="bg-white rounded-card border border-border p-8 text-center">
           <div className="h-6 w-6 rounded-lg bg-gray-200 animate-pulse mb-4" />
           <h2 className="font-headline font-bold text-xl text-medium_gray">Product not found</h2>
           <p className="text-medium_gray mt-2">The product you're looking for may no longer be available.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-warm_off_white flex items-center justify-center">
+        <div className="bg-white rounded-card border border-border p-8 text-center">
+          <div className="h-6 w-6 rounded-lg bg-gray-200 animate-pulse mb-4" />
+          <h2 className="font-headline font-bold text-xl text-medium_gray">Loading product...</h2>
         </div>
       </div>
     );
@@ -117,10 +129,13 @@ const ProductPage = () => {
             </div>
 
             {/* Quantity */}
-            <QuantityStepper
-              quantity={1}
-              onChange={(q) => console.log('Quantity:', q)}
-            />
+            <div className="mb-4">
+              <QuantityStepper
+                quantity={quantity}
+                onChange={(q) => setQuantity(q)}
+                max={product.stock || 99}
+              />
+            </div>
 
             {/* Add to cart */}
             <Button
@@ -130,7 +145,7 @@ const ProductPage = () => {
               disabled={product.availability === 'sold_out'}
               onClick={() => {
                 if (product.availability !== 'sold_out') {
-                  addItem(product, 1);
+                  addItem(product, quantity);
                   alert('Added to cart!');
                 }
               }}
