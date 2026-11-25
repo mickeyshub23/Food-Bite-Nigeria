@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
-const Toast = ({ title, description = '', variant = 'info', autoClose = true, duration = 5000 }) => {
+const Toast = ({ title, description = '', variant = 'info', duration = 5000 }) => {
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 

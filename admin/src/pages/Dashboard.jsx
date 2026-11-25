@@ -1,17 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabase';
 import { apiFetch } from '../utils/supabase';
 import { useAuth } from '../context/AuthContext';
-import Button from '../components/Button';
 import StatusBadge from '../components/StatusBadge';
-import CategoryChip from '../components/CategoryChip';
 import EmptyState from '../components/EmptyState';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     loadStats();

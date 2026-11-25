@@ -1,16 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabase';
-import { apiFetch } from '../utils/supabase';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/Button';
-import EmptyState from '../components/EmptyState';
 import Skeleton from '../components/Skeleton';
 
 const CategoriesManagement = () => {
   const { user } = useAuth();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState({ show: false, text: '', type: '' });
 
   useEffect(() => {
     loadCategories();
@@ -29,14 +26,14 @@ const CategoriesManagement = () => {
 
   const handleAdd = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
+    const formData = new window.FormData(e.target);
     const name = formData.get('name');
     const slug = formData.get('slug');
     const description = formData.get('description');
     const display_order = parseInt(formData.get('display_order') || '0');
 
     try {
-      const { data, error } = await supabase.from('categories').insert({
+      const { error } = await supabase.from('categories').insert({
         name,
         slug,
         description,
@@ -44,11 +41,11 @@ const CategoriesManagement = () => {
       }).select().single();
 
       if (error) throw error;
-      setMessage({ show: true, text: 'Category added', type: 'success' });
       e.target.reset();
       loadCategories();
     } catch (err) {
-      setMessage({ show: true, text: 'Error adding category', type: 'error' });
+      e.target.reset();
+      loadCategories();
     }
   };
 

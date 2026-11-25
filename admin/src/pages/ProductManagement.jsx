@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabase';
 import { apiFetch } from '../utils/supabase';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/Button';
 import StatusBadge from '../components/StatusBadge';
-import CategoryChip from '../components/CategoryChip';
 import EmptyState from '../components/EmptyState';
 import Skeleton from '../components/Skeleton';
 
@@ -15,7 +14,7 @@ const ProductManagement = () => {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ name: '', price: '', stock: '', category: '', image_url: '', availability: 'in_stock' });
   const [categories, setCategories] = useState([]);
-  const [message, setMessage] = useState({ show: false, text: '', type: '' });
+  const [, setMessage] = useState({ show: false, text: '', type: '' });
 
   useEffect(() => {
     loadData();
@@ -54,7 +53,7 @@ const ProductManagement = () => {
   };
 
   const handleDelete = async (id) => {
-    if (confirm('Delete this product?')) {
+    if (window.confirm('Delete this product?')) {
       await supabase.from('products').delete().eq('id', id);
       loadData();
       setMessage({ show: true, text: 'Product deleted', type: 'success' });

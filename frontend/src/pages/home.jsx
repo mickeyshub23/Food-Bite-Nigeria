@@ -1,11 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useSearchParams, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../utils/supabase';
-import CategoryChip from '../components/CategoryChip';
-import StatusBadge from '../components/StatusBadge';
-import FilterSidebar from '../components/FilterSidebar';
 import Breadcrumb from '../components/Breadcrumb';
-import FloatingBasketBar from '../components/FloatingBasketBar';
 import ProductCard from '../components/ProductCard';
 import { apiFetch } from '../utils/supabase';
 import { useCart } from '../context/CartContext';
@@ -17,7 +13,6 @@ const HomePage = () => {
   const [testimonials, setTestimonials] = useState([]);
   const [loadError, setLoadError] = useState('');
   const { addItem } = useCart();
-  const navigate = useNavigate();
 
   useEffect(() => {
     loadData();

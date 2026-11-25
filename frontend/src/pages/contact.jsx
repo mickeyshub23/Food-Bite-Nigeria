@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase } from '../utils/supabase';
 import { apiFetch } from '../utils/supabase';
 
 const ContactPage = () => {

@@ -1,10 +1,6 @@
-import React, { useEffect } from 'react';
 import { supabase } from './utils/supabase';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import AdminDashboard from './pages/AdminDashboard';
-import ProductManagement from './pages/ProductManagement';
-import OrdersManagement from './pages/OrdersManagement';
-import CategoriesManagement from './pages/CategoriesManagement';
 import LoginPage from './pages/LoginPage';
 
 const App = () => {

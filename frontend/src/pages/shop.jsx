@@ -1,8 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useSearchParams, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { supabase } from '../utils/supabase';
-import CategoryChip from '../components/CategoryChip';
-import StatusBadge from '../components/StatusBadge';
 import FilterSidebar from '../components/FilterSidebar';
 import Breadcrumb from '../components/Breadcrumb';
 import FloatingBasketBar from '../components/FloatingBasketBar';
@@ -15,12 +13,10 @@ const ShopPage = () => {
   const [categories, setCategories] = useState([]);
   const [activeFilters, setActiveFilters] = useState({ category: null, sort: null });
   const [search, setSearch] = useState('');
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 35000 });
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [itemsPerPage] = useState(12);
   const location = useLocation();
-  const navigate = useNavigate();
   const { addItem } = useCart();
 
   useEffect(() => {
@@ -65,7 +61,7 @@ const ShopPage = () => {
     const end = start + itemsPerPage - 1;
     query = query.range(start, end);
 
-    const { data, error, count } = await query;
+    const { data, error } = await query;
     if (error) console.error(error);
     else {
       setProducts(data || []);

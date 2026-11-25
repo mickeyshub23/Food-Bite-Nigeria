@@ -1,5 +1,3 @@
-import React from 'react';
-
 const QuantityStepper = ({ quantity, onChange, max = 99 }) => (
   <div className="inline-flex items-center border border-border rounded-pill overflow-hidden">
     <button

@@ -1,8 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { supabase } from '../utils/supabase';
-import { apiFetch } from '../utils/supabase';
-import ProductCard from '../components/ProductCard';
 import QuantityStepper from '../components/QuantityStepper';
 import Button from '../components/Button';
 import StatusBadge from '../components/StatusBadge';
@@ -13,7 +11,6 @@ const ProductPage = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const { addItem } = useCart();
-  const navigate = useNavigate();
 
   useEffect(() => {
     loadProduct();

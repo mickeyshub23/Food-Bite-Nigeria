@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { apiFetch, supabase } from '../utils/supabase';
 import EmptyState from '../components/EmptyState';
@@ -21,8 +21,8 @@ const CheckoutPage = () => {
     promoCode: '',
     promoValid: null,  // { valid: boolean, code?: string, discount?: number, message?: string }
   });
-  const [deliveryQuotes, setDeliveryQuotes] = useState([]);
-  const [selectedQuote, setSelectedQuote] = useState(null);
+  const [deliveryQuotes] = useState([]);
+  const [selectedQuote] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState(null);
@@ -36,16 +36,6 @@ const CheckoutPage = () => {
     };
     loadProfile();
   }, []);
-
-  const loadDeliveryQuotes = async () => {
-    if (!form.city || !form.state) return;
-    try {
-      const { data, error } = await apiFetch(`/api/delivery/quote?zone_id=${form.deliveryZoneId}`);
-      if (!error) setDeliveryQuotes(data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -124,7 +114,6 @@ const CheckoutPage = () => {
             ) : (
               <div className="bg-white rounded-card border border-border p-4 space-y-3">
                 {items.map((item) => {
-                  const validation = { valid: true };
                   return (
                     <div key={item.product_id} className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-card overflow-hidden flex-shrink-0">

@@ -1,5 +1,3 @@
-import React from 'react';
-
 const EmptyState = ({ title, description, icon = '🍽️', actionText, onAction }) => (
   <div className="flex flex-col items-center justify-center py-20 text-center">
     <span className="text-6xl mb-4">{icon}</span>

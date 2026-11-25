@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { apiFetch } from '../utils/supabase';
-import { supabase } from '../utils/supabase';
 
 const PaymentCallbackPage = () => {
   const navigate = useNavigate();
   const [reference, setReference] = useState('');
   const [status, setStatus] = useState('');
-  const [order, setOrder] = useState(null);
+  const [, setOrder] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
 

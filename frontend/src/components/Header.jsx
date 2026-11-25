@@ -1,15 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation, Outlet } from 'react-router-dom';
-import { Menu, X, ShoppingCart, Search, User2 } from 'lucide-react';
-import { supabase } from '@/utils/supabase';
-import CategoryChip from './CategoryChip';
-import StatusBadge from './StatusBadge';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Menu, X, ShoppingCart, User2 } from 'lucide-react';
 
 const Header = () => {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setUserMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
-  const location = useLocation();
 
   useEffect(() => {
     const loadCartCount = async () => {
@@ -21,10 +17,6 @@ const Header = () => {
     };
     loadCartCount();
   }, []);
-
-  const signOut = async () => {
-    await supabase.auth.signOut();
-  };
 
   return (
     <>

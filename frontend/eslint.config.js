@@ -40,6 +40,9 @@ globals: {
     },
     rules: {
       'no-undef': 'error',
+      'react/jsx-no-undef': 'error',
+      'react/jsx-uses-vars': 'error',
+      'react/jsx-uses-react': 'off',
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
     },

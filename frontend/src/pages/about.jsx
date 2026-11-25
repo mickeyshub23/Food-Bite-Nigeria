@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../utils/supabase';
 
 const AboutPage = () => {
-  const [settings, setSettings] = useState({});
+  const [, setSettings] = useState({});
 
   useEffect(() => {
     const load = async () => {

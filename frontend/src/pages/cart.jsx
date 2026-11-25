@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { apiFetch } from '../utils/supabase';
 import EmptyState from '../components/EmptyState';
 
 const CartPage = () => {
-  const { items, total, itemCount, removeItem, updateQuantity, clearCart } = useCart();
+  const { items, total, itemCount, removeItem, updateQuantity } = useCart();
   const navigate = useNavigate();
   const [validatedItems, setValidatedItems] = useState({});
 

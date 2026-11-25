@@ -1,5 +1,3 @@
-import React from 'react';
-
 const StatusBadge = ({ status, className = '' }) => {
   const configs = {
     in_stock: { label: 'In stock', color: 'bg-green-100 text-green-700' },

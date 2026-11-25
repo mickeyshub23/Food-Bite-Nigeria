@@ -1,5 +1,3 @@
-import React from 'react';
-
 const CategoryChip = ({ name, count, onClick, active = false }) => (
   <button
     onClick={onClick}

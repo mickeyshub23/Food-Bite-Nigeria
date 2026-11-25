@@ -1,6 +1,4 @@
-import React from 'react';
-
-const Skeleton = ({ variant = 'product', count = 6 }) => {
+const Skeleton = ({ variant = 'product' }) => {
   if (variant === 'product') {
     return (
       <div className="bg-white rounded-card border border-border overflow-hidden">

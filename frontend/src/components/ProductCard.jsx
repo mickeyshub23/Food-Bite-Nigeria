@@ -1,5 +1,4 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import Button from './Button';
 
 const ProductCard = ({ product, onAddToCart }) => {
   const formatNaira = (kobo) => '₦' + Math.round(kobo / 100).toLocaleString();

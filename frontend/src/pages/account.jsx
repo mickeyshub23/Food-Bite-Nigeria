@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { supabase } from '../utils/supabase';
 import { apiFetch } from '../utils/supabase';
 import EmptyState from '../components/EmptyState';
 import OrderCard from '../components/OrderCard';
-import StatusBadge from '../components/StatusBadge';
 
 const AccountPage = () => {
   const { orderId } = useParams();
@@ -14,7 +13,6 @@ const AccountPage = () => {
   const [activeTab, setActiveTab] = useState('orders');
   const [loading, setLoading] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     loadAccount();

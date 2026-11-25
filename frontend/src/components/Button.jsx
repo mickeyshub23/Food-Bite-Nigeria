@@ -1,5 +1,3 @@
-import React from 'react';
-
 const Button = ({ children, variant = 'primary', size = 'md', className = '', onClick, disabled, type = 'button', ...props }) => {
   const base = 'inline-flex items-center justify-center font-label font-semibold rounded-pill transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed';
   const variants = {
