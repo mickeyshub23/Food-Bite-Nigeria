@@ -399,6 +399,23 @@ app.get('/api/promo/active', async (req, res) => {
   }
 });
 
+// ========== DELIVERY ZONES ==========
+app.get('/api/delivery/zones', async (req, res) => {
+  try {
+    const { data: zones, error } = await supabase
+      .from('delivery_zones')
+      .select('*')
+      .eq('is_active', true)
+      .order('name');
+
+    if (error) throw error;
+
+    res.json({ data: zones.map(z => ({ zone_id: z.id, zone_name: z.name, fee_kobo: z.fee_kobo, estimated_days: z.estimated_days })) });
+  } catch (err) {
+    res.status(500).json({ error: { message: err.message } });
+  }
+});
+
 // ========== DELIVERY QUOTE ==========
 app.get('/api/delivery/quote', async (req, res) => {
   try {

@@ -21,8 +21,8 @@ const CheckoutPage = () => {
     promoCode: '',
     promoValid: null,  // { valid: boolean, code?: string, discount?: number, message?: string }
   });
-  const [deliveryQuotes] = useState([]);
-  const [selectedQuote] = useState(null);
+  const [deliveryQuotes, setDeliveryQuotes] = useState([]);
+  const [selectedQuote, setSelectedQuote] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState(null);
@@ -35,6 +35,17 @@ const CheckoutPage = () => {
       }
     };
     loadProfile();
+
+    // Fetch delivery zones
+    const loadZones = async () => {
+      try {
+        const { data: zones, error: zoneError } = await apiFetch('/api/delivery/zones');
+        if (!zoneError && zones) setDeliveryQuotes(zones);
+      } catch (err) {
+        console.error('Failed to fetch delivery zones', err);
+      }
+    };
+    loadZones();
   }, []);
 
   const handleChange = (e) => {
@@ -78,7 +89,7 @@ const CheckoutPage = () => {
       if (error) throw new Error(error.message);
 
       // Redirect to Paystack
-      window.location.href = `/payment/callback?reference=${data.data.order.order_number}`;
+      window.location.href = `/payment/callback?reference=${data.order_number}`;
     } catch (err) {
       setError(err.message || 'Payment failed');
       setLoading(false);
@@ -242,12 +253,15 @@ const CheckoutPage = () => {
                 {/* Delivery zone selector */}
                 <div>
                   <label className="block text-sm text-medium_gray mb-1">Delivery zone</label>
-                  <select
-                    name="deliveryZoneId"
-                    value={form.deliveryZoneId || ''}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg bg-white shadow-sm border border-border focus:outline-none focus:ring-2 focus:ring-rust transition-colors"
-                  >
+                <select
+                  name="deliveryZoneId"
+                  value={selectedQuote?.zone_id || form.deliveryZoneId || ''}
+                  onChange={(e) => {
+                    const zoneId = e.target.value;
+                    setSelectedQuote(deliveryQuotes.find((q) => q.zone_id === zoneId) || null);
+                  }}
+                  className="w-full px-4 py-3 rounded-lg bg-white shadow-sm border border-border focus:outline-none focus:ring-2 focus:ring-rust transition-colors"
+                >
                     <option value="">Select delivery zone</option>
                     {deliveryQuotes.map((q) => (
                       <option key={q.zone_id} value={q.zone_id}>
