@@ -17,7 +17,7 @@ const ShopPage = () => {
   const [page, setPage] = useState(1);
   const [itemsPerPage] = useState(12);
   const location = useLocation();
-  const { addItem } = useCart();
+  const { addItem, itemCount, total } = useCart();
 
   useEffect(() => {
     loadProducts();
@@ -25,7 +25,7 @@ const ShopPage = () => {
   }, []);
 
   const loadProducts = async () => {
-    const { searchParams } = new URLSearchParams(location.search);
+    const searchParams = new URLSearchParams(location.search);
     const page = parseInt(searchParams.get('page') || '1');
 
     let query = supabase
@@ -161,11 +161,7 @@ const ShopPage = () => {
                 <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                   <path d="M22 7l-5 5-5-5H3l9 9 9-9zM7 23l-3-3l5-5 3 3v5zM7 15l-3-3l5-5 3 3v5z" />
                 </svg>
-                {useCart ? (
-                  useCart().itemCount
-                ) : (
-                  0
-                )}
+                {itemCount}
               </a>
             </div>
           </div>
@@ -303,8 +299,8 @@ const ShopPage = () => {
 
           {/* Floating basket bar */}
           <FloatingBasketBar
-            itemCount={useCart ? useCart().itemCount : 0}
-            totalKobo={useCart ? useCart().total : 0}
+            itemCount={itemCount}
+            totalKobo={total}
           />
         </div>
       </section>
